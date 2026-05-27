@@ -16,6 +16,24 @@ Two readings: the prey a predator hunts (mempool victim transactions in the "dar
 
 Top-level `contracts/` (Foundry, Yul + Solidity tests) and `bot/` (TypeScript, bun runtime) as siblings. No workspace tooling — they communicate via deployed contract address + ABI only, never share TS types. **Why:** the on-chain and off-chain code have orthogonal toolchains (forge vs. bun) and orthogonal release cadences (a Yul contract is deployed once and frozen; the bot iterates daily). **How to apply:** when adding shared code (e.g. pool-address constants), prefer code generation from a single TOML config over a shared TS package — keeps the two trees independent.
 
+## 2026-05-27 — Published to github.com/Builder106/Quarry; first CI run green #milestone
+
+Quarry is now public at https://github.com/Builder106/Quarry. Single first commit captures the entire V0 (everything since project kickoff in this session — 39 files, both off-chain and on-chain trees, plus assets/, docs, CI workflow). Repo metadata set via `gh repo create` and `gh repo edit`:
+
+- Description: "A bare-metal MEV arbitrage bot — TypeScript mempool scanner + Yul executor + Aave V3 flashloans. 188 B runtime, 110k gas two-hop, 99.89% prediction accuracy."
+- Topics (12): `aave-v3`, `arbitrage`, `bare-metal`, `bun`, `defi`, `ethereum`, `flashloan`, `foundry`, `mev`, `typescript`, `uniswap-v2`, `yul`.
+- Visibility: PUBLIC.
+
+First CI run (26537198472) completed in ~17s wall-clock — both jobs green:
+- `contracts (forge)` in 16s: install Foundry → install forge-std → `forge build --sizes` → `forge test -vvv` (13 tests pass, 1 fork test skips without RPC).
+- `bot (bun)` in 17s: install Bun 1.3 → `bun install --frozen-lockfile` → `bun run typecheck` → `bun test` (65 tests, 2,132 assertions).
+
+README CI badge updated from the local-only `shields.io/badge/CI-configured-success` placeholder to the live `actions/workflows/ci.yml/badge.svg` URL — it now reflects real pass/fail state.
+
+Pre-flight safety check before the commit: grepped tracked-able files for `private[_-]?key|secret|api[_-]?key|password|MAINNET_RPC_URL=https` patterns, confirmed only doc placeholders matched (no real RPC URLs, no live private keys; the Anvil `0xac0974…` key in `sign.test.ts` and `demo.ts` is the published default test key and never holds real funds). No `.env` file present; only `.env.example` is committed.
+
+One CI warning worth noting for future-me: `actions/checkout@v4` runs on Node 20, which GitHub will deprecate by June 2026. The action's maintainers will roll it forward to Node 24 well before then; no action needed unless the warning persists past the Node 24 default cutover.
+
 ## 2026-05-27 — Recorded demo GIF lands in README #milestone
 
 `assets/demo.gif` (137 KB, github-dark theme via `agg`) embeds at the top of the README's Demo section. Captures `bun run demo` end-to-end: anvil reachable → executor deploys → score (pre-victim reserves + the back-run prediction) → victim impersonation + swap → FLASHLOAN BUNDLE (borrows 5.3 WETH from real Aave V3) → VERIFY (net realized 0.558 WETH, 99.89% of predicted). Pipeline: `asciinema rec --command "bun run demo"` produces a `.cast` file (~3 KB JSON), `agg --theme github-dark --speed 1.5 --cols 110 --font-size 14` renders it to GIF. The agg output is ten visually-distinct frames (the deduplicator drops identical states, so a fast-running demo compresses cleanly), played at ~1 fps with a 3-second hold on the final frame. README's existing text-trace fallback updated under the same `<details>` block to match the new V3 flashloan run (previous trace was from the pre-flashloan V2 demo with `STAGE BACK-RUN INPUT` instead of `FLASHLOAN BUNDLE`).
