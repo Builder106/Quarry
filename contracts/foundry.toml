@@ -1,0 +1,37 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+test = "test"
+script = "script"
+solc_version = "0.8.28"
+optimizer = true
+optimizer_runs = 1_000_000
+via_ir = true
+# Yul sources live alongside Solidity; forge compiles .yul files when
+# referenced via vm.getCode("Contract.yul") in tests.
+extra_output = ["irOptimized"]
+bytecode_hash = "none"
+cbor_metadata = false
+
+[profile.default.fuzz]
+runs = 256
+
+# Foundry 1.7's solar lint doesn't yet understand Yul object syntax — it
+# treats `object "Name" { ... }` as if it were Solidity and errors. Disable
+# the build-time lint pass. Re-enable once solar grows Yul support, or run
+# `forge lint` explicitly against .sol files only.
+[lint]
+lint_on_build = false
+
+[rpc_endpoints]
+mainnet = "${MAINNET_RPC_URL}"
+sepolia = "${SEPOLIA_RPC_URL}"
+
+[fmt]
+line_length = 100
+tab_width = 4
+bracket_spacing = false
+int_types = "long"
+quote_style = "double"
+number_underscore = "thousands"

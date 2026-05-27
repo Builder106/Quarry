@@ -1,0 +1,7 @@
+ExecutorTest:testFuzz_TwoHopProfit(uint64,uint64) (runs: 256, μ: 85881, ~: 86050)
+ExecutorTest:test_GasCeiling_TwoHop_WithMocks() (gas: 84597)
+ExecutorTest:test_Hop1Reverts_StopsAtomically() (gas: 205944)
+ExecutorTest:test_Hop2Reverts_StopsAtomically() (gas: 239713)
+ExecutorTest:test_InsufficientProfit_Reverts() (gas: 96091)
+ExecutorTest:test_ProfitableArb_TwoHop() (gas: 87493)
+ExecutorTest:test_StrangerCall_Reverts() (gas: 19455)
