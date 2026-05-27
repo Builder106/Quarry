@@ -16,6 +16,25 @@ Two readings: the prey a predator hunts (mempool victim transactions in the "dar
 
 Top-level `contracts/` (Foundry, Yul + Solidity tests) and `bot/` (TypeScript, bun runtime) as siblings. No workspace tooling — they communicate via deployed contract address + ABI only, never share TS types. **Why:** the on-chain and off-chain code have orthogonal toolchains (forge vs. bun) and orthogonal release cadences (a Yul contract is deployed once and frozen; the bot iterates daily). **How to apply:** when adding shared code (e.g. pool-address constants), prefer code generation from a single TOML config over a shared TS package — keeps the two trees independent.
 
+## 2026-05-27 — Historical-arb replay script lands #milestone
+
+`bot/scripts/historical-replay.ts` (`bun run replay`) closes the last item on the V0 punch list. Reads UniV2 + Sushi WETH/USDC reserves at whatever block anvil is forked at, runs the bot's standing-arb math (`getOptimalInput` from `amm.ts`) in both possible round-trip directions (sell-on-UniV2 / sell-on-Sushi), and either:
+
+- **executes the better direction via Aave V3 flashloan** when a real profitable gap exists, then asserts realized matches predicted; or
+- **prints a diagnostic gap analysis** showing each direction's probe-input round-trip output and predicted loss-to-fees, exiting 0 — "no opportunity" is not a failure.
+
+At HEAD (block 25189150 during this run): UniV2 implied price 2,056.89 USDC/WETH vs Sushi 2,055.57. Cross-DEX gap of 0.060% — well under the 0.60% combined round-trip fee floor. Both directions show a ~2.1% gross loss on a 1-WETH probe (0.60% fees + ~1.5% adverse slippage on Sushi's depleted WETH reserve of ~62 WETH). Diagnostic exits cleanly with an explanation pointing the user toward archival RPC + high-volatility blocks for an actual historical replay.
+
+The script reuses the existing `getAmountOut`, `getOptimalInput` (amm.ts), `buildFlashloanCall` (bundle.ts), and `fetchChainFees` + `signExecutorTx` (sign.ts) — same primitives demo.ts uses, just without the synthetic victim swap. ~280 lines of TS total, no new src/ files needed.
+
+The framing is honest about what's possible without archival access:
+- *At HEAD*: educational gap-analysis tool that demonstrates the bot's math against real chain state.
+- *With archival RPC + a pinned `--fork-block-number`*: actual historical-arb replay that proves the bot would have caught a specific past opportunity.
+
+The latter requires an Alchemy / Infura / dedicated-node URL — free public RPCs don't keep historical state beyond ~128 blocks. Documented in the README's Demo section + this entry.
+
+V0 is complete. From here, follow-up work is either expanding scope (multi-hop paths, ETH-side variants, WETH/non-WETH base gas gate) or refining presentation (sponsor track wiring, screen-recorded portfolio video, blog post on the bare-metal Yul advantage).
+
 ## 2026-05-27 — Published to github.com/Builder106/Quarry; first CI run green #milestone
 
 Quarry is now public at https://github.com/Builder106/Quarry. Single first commit captures the entire V0 (everything since project kickoff in this session — 39 files, both off-chain and on-chain trees, plus assets/, docs, CI workflow). Repo metadata set via `gh repo create` and `gh repo edit`:

@@ -175,6 +175,40 @@ The 0.11% drift between net predicted and net realized is exactly the 2 bp safet
 
 </details>
 
+### Historical-arb replay (`bun run replay`)
+
+A second script reads the current WETH/USDC reserves on Uniswap V2 + Sushiswap (no synthetic victim), runs the bot's standing-arb math in both possible round-trip directions, and either executes via Aave V3 flashloan when a real profitable gap exists, or prints a diagnostic gap analysis showing each direction's predicted loss-to-fees.
+
+```bash
+# Terminal 1 — anvil at HEAD (no archival needed)
+anvil --fork-url https://ethereum-rpc.publicnode.com
+
+# Terminal 1, alternate — pin to a known-arb block (needs archival RPC)
+anvil --fork-url $ALCHEMY_URL --fork-block-number 15990000
+
+# Terminal 2
+cd bot && bun run replay
+```
+
+At any random recent block, the typical cross-DEX gap on WETH/USDC is well below the combined ~0.6% round-trip fee — competing MEV bots close real gaps within the same block they form. The script's diagnostic mode shows that:
+
+```
+━━━ RESERVE SNAPSHOT ━━━
+[replay] UniV2  0xB4e16d…  USDC=9152516.072170 USDC  WETH=4449.682244 WETH
+[replay] Sushi  0x397FF1…  USDC=127338.484262 USDC  WETH=61.948146 WETH
+[replay] cross-DEX gap: 0.060% (round-trip fee floor is ~0.60%)
+…
+━━━ DIAGNOSIS ━━━
+[replay] no profitable arb at block 25189150.
+[replay] this is normal at any random recent block — competing
+[replay] MEV bots close cross-DEX gaps within the same block they
+[replay] form. To find a real historical opportunity, pin anvil
+[replay] to a block of high volatility (large liquidations, mempool
+[replay] congestion, etc.) and re-run with archival RPC access.
+```
+
+Pinning `FORK_BLOCK` to a moment of high volatility (liquidation cascades, large mempool trades that landed without a back-runner) converts the diagnostic into a real historical-arb replay.
+
 ## Performance gates
 
 | Surface | Gate | Current |
