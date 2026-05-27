@@ -11,7 +11,7 @@
 [![Yul runtime](https://img.shields.io/badge/runtime-188_B-fcc419.svg)](contracts/src/Executor.yul)
 [![Two-hop gas](https://img.shields.io/badge/two--hop_gas-110k-fcc419.svg)](contracts/test/ExecutorFork.t.sol)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](#license)
-[![Live site](https://img.shields.io/badge/site-quarry--pied.vercel.app-fcc419.svg)](https://quarry-pied.vercel.app)
+[![Live site](https://img.shields.io/badge/site-quarry--mev.vercel.app-fcc419.svg)](https://quarry-mev.vercel.app)
 
 Quarry is a hybrid MEV arbitrage engine. A TypeScript scanner watches Ethereum's public mempool for swaps about to land on a Uniswap-V2-shaped DEX; for each candidate, it back-computes the price the victim will leave behind, runs a closed-form optimal-input solver against the post-victim reserves, and — if the round-trip profit beats both fees and gas — packs a 220-byte calldata payload, signs an EIP-1559 transaction, and wraps it in an `eth_sendBundle` envelope. The executor is a single Yul object, 188 bytes of runtime bytecode, that performs the full two-hop arbitrage and reverts atomically if the realized profit falls short. Every opcode shaved off the on-chain leg widens the marginal profit envelope — that's the engineering thesis.
 

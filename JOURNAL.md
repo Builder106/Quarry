@@ -16,6 +16,16 @@ Two readings: the prey a predator hunts (mempool victim transactions in the "dar
 
 Top-level `contracts/` (Foundry, Yul + Solidity tests) and `bot/` (TypeScript, bun runtime) as siblings. No workspace tooling — they communicate via deployed contract address + ABI only, never share TS types. **Why:** the on-chain and off-chain code have orthogonal toolchains (forge vs. bun) and orthogonal release cadences (a Yul contract is deployed once and frozen; the bot iterates daily). **How to apply:** when adding shared code (e.g. pool-address constants), prefer code generation from a single TOML config over a shared TS package — keeps the two trees independent.
 
+## 2026-05-27 — Canonical site URL is now quarry-mev.vercel.app #decision
+
+User asked "pied?" about the original `quarry-pied.vercel.app` auto-alias — that's just Vercel's randomly-generated short suffix when `quarry.vercel.app` is taken across the platform. Took the recommendation to rename to `quarry-mev.vercel.app`.
+
+Three steps + one papercut:
+1. `vercel alias set quarry-if4sn0q25-sankofa-forge.vercel.app quarry-mev.vercel.app` — assigns the new alias. Succeeded in 401 ms.
+2. **Papercut**: `quarry-mev.vercel.app` returned HTTP 401 (deployment protection) — `sankofa-forge` is on a team plan where all *.vercel.app URLs require Vercel Auth except the project's *configured production domains*. The auto-alias `quarry-pied` had been auto-added as a configured domain by Vercel; the custom alias I added via `vercel alias set` was NOT. Fix: `vercel domains add quarry-mev.vercel.app` (single-arg form, since project is linked). After that, the URL returns 200. **How to apply:** on a team-plan project, custom aliases need `vercel domains add` (not just `vercel alias set`) to bypass deployment protection.
+3. Redeployed with `SITE_URL = "https://quarry-mev.vercel.app"` in `app/layout.tsx` so the OG + Twitter card metadata bake in the new canonical URL. Updated README badge, GitHub repo's homepage URL (`gh repo edit --homepage`).
+4. `quarry-pied.vercel.app` still works — Vercel re-aliases each fresh deployment to the project's auto-generated short URL. Removing it via `vercel alias rm` only removes the binding for ONE deployment; subsequent deploys recreate it. Harmless to leave both; everything authoritative (README, OG, GitHub homepage) points at `quarry-mev`.
+
 ## 2026-05-27 — Quarry has a deployed site: quarry-pied.vercel.app #milestone
 
 Live at https://quarry-pied.vercel.app (the alias) / https://quarry-if4sn0q25-sankofa-forge.vercel.app (the direct deployment URL). Single static landing page in `site/` rooted on a separate Vercel project (`sankofa-forge/quarry`), built with Next.js 16 + Tailwind v4 CSS-first config — no shadcn, no client JS beyond Next's default React hydration. Build time: 15 s on Vercel's builders. Fully prerendered (`○ (Static)`), no functions, no edge config, nothing to monitor at runtime.
