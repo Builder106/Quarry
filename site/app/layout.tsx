@@ -1,7 +1,7 @@
 import type {Metadata} from "next";
 import "./globals.css";
 
-const SITE_URL = "https://quarry-mev.vercel.app";
+const SITE_URL = "https://quarry-pied.vercel.app";
 
 export const metadata: Metadata = {
     title: "Quarry — A bare-metal MEV arbitrage simulator",

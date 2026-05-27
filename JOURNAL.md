@@ -16,6 +16,20 @@ Two readings: the prey a predator hunts (mempool victim transactions in the "dar
 
 Top-level `contracts/` (Foundry, Yul + Solidity tests) and `bot/` (TypeScript, bun runtime) as siblings. No workspace tooling — they communicate via deployed contract address + ABI only, never share TS types. **Why:** the on-chain and off-chain code have orthogonal toolchains (forge vs. bun) and orthogonal release cadences (a Yul contract is deployed once and frozen; the bot iterates daily). **How to apply:** when adding shared code (e.g. pool-address constants), prefer code generation from a single TOML config over a shared TS package — keeps the two trees independent.
 
+## 2026-05-27 — Quarry has a deployed site: quarry-pied.vercel.app #milestone
+
+Live at https://quarry-pied.vercel.app (the alias) / https://quarry-if4sn0q25-sankofa-forge.vercel.app (the direct deployment URL). Single static landing page in `site/` rooted on a separate Vercel project (`sankofa-forge/quarry`), built with Next.js 16 + Tailwind v4 CSS-first config — no shadcn, no client JS beyond Next's default React hydration. Build time: 15 s on Vercel's builders. Fully prerendered (`○ (Static)`), no functions, no edge config, nothing to monitor at runtime.
+
+Page structure: hero with the dark banner (auto-switches to light via `<picture>` + `prefers-color-scheme`), four-up stats row (188 B, 110k gas, 99.89% accuracy, 0 inventory), the 9-step pipeline as a numbered ordered list with circled-gold step markers, demo GIF in a bordered card, a two-column "what's in the repo" module grid, and a CTA + footer. Dark mode default; same `#0a0e16 / #fcc419` palette as the banner. The CSS uses Tailwind v4's `@theme` directive for the design tokens so everything stays one file.
+
+Both branches the user asked for in the conversation are now closed:
+- **GitHub**: https://github.com/Builder106/Quarry (CI green on every push)
+- **Deployed site**: https://quarry-pied.vercel.app (linked from the repo's homepage URL via `gh repo edit --homepage`)
+
+Two papercuts captured for next time:
+- The Vercel project ended up under the `sankofa-forge` team scope rather than `builder106`. `vercel link --yes --project quarry` defaulted to whichever scope is "active" in the CLI's settings; I expected the personal scope. If the user wants it under their personal account instead, that's `vercel link --scope builder106 --project quarry` and a fresh deploy.
+- The first OG metadata used a placeholder `quarry-mev.vercel.app` URL. Fix was a one-line edit to `SITE_URL` in `app/layout.tsx` and a re-deploy. **How to apply:** when scaffolding a site whose final URL isn't known yet, leave SITE_URL as a TODO placeholder and re-deploy once known. Easier than guessing.
+
 ## 2026-05-27 — Historical-arb replay script lands #milestone
 
 `bot/scripts/historical-replay.ts` (`bun run replay`) closes the last item on the V0 punch list. Reads UniV2 + Sushi WETH/USDC reserves at whatever block anvil is forked at, runs the bot's standing-arb math (`getOptimalInput` from `amm.ts`) in both possible round-trip directions (sell-on-UniV2 / sell-on-Sushi), and either:
