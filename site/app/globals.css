@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+/*
+ * Quarry's design tokens. Same palette as the banner-dark.svg: deep slate
+ * background, near-white primary text, muted slate secondary, gold accent.
+ */
+@theme {
+    --color-bg: #0a0e16;
+    --color-bg-2: #131826;
+    --color-surface: #161c2e;
+    --color-border: #2a3148;
+    --color-text: #f0f3f9;
+    --color-text-muted: #a7b1c5;
+    --color-text-dim: #6e7689;
+    --color-gold: #fcc419;
+    --color-gold-deep: #d99b00;
+
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+        sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+html,
+body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* Subtle stratigraphic rules across the page, echoing the banner. */
+body {
+    background-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        transparent 79.5%,
+        rgba(26, 34, 56, 0.45) 80%,
+        transparent 80.5%
+    );
+    background-size: 100% 5rem;
+}
+
+::selection {
+    background: rgba(252, 196, 25, 0.25);
+    color: var(--color-text);
+}
