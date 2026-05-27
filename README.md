@@ -191,8 +191,6 @@ Snapshots checked into [`contracts/.gas-snapshot`](contracts/.gas-snapshot). PRs
 
 ## What's in V0 (and what isn't)
 
-Honest scope, so nobody reads more into this than they should:
-
 **Works today**
 - Yul executor: chained two-hop swap on Uniswap-V2-shaped pools with balance-snapshot revert guard. Real-pool fork test green at 110k gas.
 - Scanner: WebSocket pending-tx → router filter → calldata decode → multicall reserves → back-run scoring (apply victim → solve optimal input) → 220-byte calldata.
