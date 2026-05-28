@@ -1,7 +1,32 @@
 import type {Metadata} from "next";
+import {Big_Shoulders, IBM_Plex_Sans, JetBrains_Mono} from "next/font/google";
 import "./globals.css";
 
 const SITE_URL = "https://quarry-mev.vercel.app";
+
+// Industrial signage display — heavy weight only, chiseled feel.
+const bigShoulders = Big_Shoulders({
+    subsets: ["latin"],
+    weight: ["500", "700", "900"],
+    variable: "--font-display",
+    display: "swap",
+});
+
+// Body — taut technical sans, two weights only.
+const plex = IBM_Plex_Sans({
+    subsets: ["latin"],
+    weight: ["400", "500"],
+    variable: "--font-sans",
+    display: "swap",
+});
+
+// Surveyor-tablet readouts.
+const jetbrains = JetBrains_Mono({
+    subsets: ["latin"],
+    weight: ["400", "500", "700"],
+    variable: "--font-mono",
+    display: "swap",
+});
 
 export const metadata: Metadata = {
     title: "Quarry — A bare-metal MEV arbitrage simulator",
@@ -27,7 +52,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
     return (
-        <html lang="en">
+        <html
+            lang="en"
+            className={`${bigShoulders.variable} ${plex.variable} ${jetbrains.variable}`}
+        >
             <body className="min-h-screen">{children}</body>
         </html>
     );
