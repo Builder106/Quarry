@@ -147,12 +147,12 @@ contract ExecutorForkTest is Test {
         emit log_named_uint("fee loss (wethIn - wethOut)", wethIn - wethOut);
         emit log_named_uint("gas: real-pool two-hop", gasUsed);
 
-        // The strict 35k two-hop gate from CONTRIBUTING.md applies here — but
-        // it covers the executor's OWN opcodes, not the cost of Uniswap V2's
-        // own swap() (which is unavoidable and dominates total gas). Real
-        // two-hop on mainnet typically lands at 150-200k. Until we have a way
-        // to subtract pool gas from total gas cleanly, the assertion below
-        // guards against catastrophic regressions only.
-        assertLt(gasUsed, 250_000, "real-pool two-hop must stay under 250k gas");
+        // Real-pool two-hop measured at 110,957 gas (2026-06-13, mainnet fork
+        // at HEAD via publicnode). The bulk is the unavoidable Uniswap V2 +
+        // Sushiswap swap() cost; the executor's own Yul body is ~6k. 130k is
+        // the CONTRIBUTING.md non-negotiable — ~17% headroom over the 111k
+        // baseline, enough to absorb block-to-block reserve variance on a
+        // HEAD fork without masking a real regression.
+        assertLt(gasUsed, 130_000, "real-pool two-hop must stay under 130k gas (baseline ~111k)");
     }
 }

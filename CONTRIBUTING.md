@@ -83,12 +83,32 @@ bytecode.
 
 ## Performance non-negotiables
 
-- **Total gas for the two-hop arbitrage path on a forked mainnet snapshot
-  must stay under 130,000 gas**, measured by `ExecutorFork.t.sol` against
-  real Uniswap V2 + Sushiswap WETH/USDC pools. Current baseline: ~111k.
-  This includes the called pools' own swap() gas (the dominant cost — our
-  Yul body is only ~6k of the total). Any PR that pushes this ceiling needs
-  justification and a corresponding reduction elsewhere.
+- **Executor gas budget — two complementary guards:**
+  - *Mock path (CI-enforced).* The full two-hop swap through mocked pools must
+    stay under **100,000 gas** — `Executor.t.sol::test_GasCeiling_TwoHop_WithMocks`,
+    currently **~84.5k** (see `.gas-snapshot`). This is the gate every PR must
+    keep green. The executor's own Yul body is only ~6k of it; the rest is the
+    mocks' swap accounting.
+  - *Real-pool path (fork test).* `ExecutorFork.t.sol::test_TwoHopRoundTrip_AgainstRealPools`
+    runs the same path against live Uniswap V2 + Sushiswap WETH/USDC pools,
+    whose own `swap()` gas dominates and is unavoidable. **Must stay under
+    130,000 gas** — measured baseline **110,957 (~111k)** on 2026-06-13
+    (mainnet fork at HEAD), so the ceiling carries ~17% headroom for
+    block-to-block reserve variance. It's skipped unless `MAINNET_RPC_URL` is
+    set, so it's not part of the default CI gate; re-measure / re-run with:
+
+    ```bash
+    cd contracts
+    MAINNET_RPC_URL=https://ethereum-rpc.publicnode.com \
+      forge test --match-test test_TwoHopRoundTrip_AgainstRealPools -vvv
+    ```
+
+    (any mainnet RPC works — the test forks at HEAD, no archive node needed;
+    it logs `gas: real-pool two-hop`). Wire `MAINNET_RPC_URL` as a CI secret to
+    enforce this ceiling on every push.
+
+  Any PR that pushes either guard needs justification and a corresponding
+  reduction elsewhere.
 - The scanner's mempool-tx-to-opportunity-decision latency must stay under
   20 ms at the p99 (measured on a 1-hour mainnet sample). Cross-DEX math
   hot path may not allocate.
