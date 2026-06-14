@@ -4,6 +4,10 @@
 > things happen — retrospectives need this raw material to land.
 > Reverse-chronological; one paragraph max per entry.
 
+## 2026-06-13 — Visual identity unified to "Core Sample" (favicon + banner) #decision
+
+The site got its "Core Sample" redesign (earth-toned mine-shaft palette, ore-gold accent) back in May, but the favicon was missing and the README/OG banner still carried the *retired* blue-slate + `#fcc419` scheme — so the tab icon, social card, and live site disagreed. Added a custom favicon (`site/app/icon.svg`) + Apple touch icon (`site/app/apple-icon.png`, 180×180 full-bleed) using the established quarry-pit nested-hexagon mark recolored to the live palette (shaft `#14110d`, ore-gold `#d4923a` core), via Next's App Router file convention. Then regenerated both banners (`assets/` for the README `<picture>`, `site/public/` for OG) in the same language: stratigraphic sediment rules + ore seam, heavy `QUARRY` wordmark, the matching hexagon mark, mono claim chips. Rasterized 1200×420 PNGs alongside and switched the OG/Twitter `og:image` from the SVG to the PNG — SVG og:images don't render on Twitter/Slack/Discord, so the social card was effectively blank before. One stray inconsistency left: the README shields badges still use `fcc419`.
+
 ## 2026-06-13 — site/ got its first tests #milestone
 
 The Next.js `site/` had no test framework at all (no `test` script, no specs) and no CI job. Added Vitest + Testing Library (jsdom) and a real component test for `DepthMeter` — the `"use client"` scroll-depth indicator: asserts the surface/zero-padded start state and that scroll progress maps to the right metres + stratum band (SHALE at 50%, BEDROCK near the bottom), driving it by overriding jsdom's read-only `scrollY`/`scrollHeight`/`innerHeight`. Deliberately avoided jest-dom matchers (plain DOM assertions) so `tsc --noEmit` stays green with no extra type plumbing. Wired a `site (bun · vitest)` job into CI alongside `contracts` and `bot`. 3 tests green, typecheck green.

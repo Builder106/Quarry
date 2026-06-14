@@ -39,14 +39,14 @@ export const metadata: Metadata = {
             "188 bytes of Yul. 110k gas on real Uniswap V2 + Sushiswap pools. Aave V3 flashloans, no inventory required.",
         url: SITE_URL,
         siteName: "Quarry",
-        images: [{url: "/banner-dark.svg", width: 1200, height: 420}],
+        images: [{url: "/banner-dark.png", width: 1200, height: 420}],
         type: "website",
     },
     twitter: {
         card: "summary_large_image",
         title: "Quarry — A bare-metal MEV arbitrage simulator",
         description: "188 B Yul. 110k gas. Aave V3 flashloans.",
-        images: ["/banner-dark.svg"],
+        images: ["/banner-dark.png"],
     },
 };
 
